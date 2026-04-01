@@ -6,10 +6,10 @@ class Settings(BaseSettings):
 
     anthropic_api_key: str = ""
 
-    # Model assignments per role
+    # Model assignments per role (use exact model IDs)
     model_orchestrator: str = "claude-opus-4-6"
     model_engineer: str = "claude-opus-4-6"
-    model_classifier: str = "claude-haiku-4-5-20251001"
+    model_classifier: str = "claude-haiku-4-5"
     model_translator: str = "claude-sonnet-4-6"
     model_ceo_filter: str = "claude-sonnet-4-6"
 
@@ -19,6 +19,9 @@ class Settings(BaseSettings):
 
     # Agent defaults
     max_agent_turns: int = 25
+
+    # Project defaults
+    default_project_dir: str = "."
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
