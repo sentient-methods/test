@@ -14,6 +14,7 @@ from backend.chat.session import store
 from backend.intent.translator import translate_intent
 from backend.agents.orchestrator import execute_intent
 from backend.middleware.progressive_disclosure import detect_detail_level
+from backend.tools.workspace import get_workspace_files
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -165,6 +166,13 @@ async def get_session(session_id: str):
             for msg in session.messages
         ],
     })
+
+
+@router.get("/sessions/{session_id}/files")
+async def get_session_files(session_id: str):
+    """List all files the agents have created in a session's workspace."""
+    files = get_workspace_files(session_id)
+    return JSONResponse({"session_id": session_id, "files": files})
 
 
 async def _send(websocket: WebSocket, response: SystemResponse) -> None:

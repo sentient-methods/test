@@ -12,6 +12,7 @@ from fastapi.responses import FileResponse
 from backend.chat.router import router as chat_router
 from backend.chat.session import store
 from backend.tools.preview import preview_manager
+from backend.tools.workspace import list_workspaces
 
 logging.basicConfig(
     level=logging.INFO,
@@ -55,6 +56,12 @@ async def health():
         "slogan": "Make it happen.",
         "tagline": "As you wish.",
     }
+
+
+@app.get("/api/workspaces")
+async def get_workspaces():
+    """List all project workspaces."""
+    return list_workspaces()
 
 
 @app.get("/api/preview/{session_id}")
