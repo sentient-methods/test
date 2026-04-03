@@ -65,9 +65,10 @@ async def chat_websocket(websocket: WebSocket):
                     agent=AgentPhase.CHIEF_OF_STAFF,
                     agent_status=AgentStatus.BLOCKED,
                 ))
+                await _send(websocket, SystemResponse(type="done", content=""))
                 continue
 
-            # If clarifications are needed, ask the CEO
+            # If clarifications are needed, ask the CEO and re-enable input
             if intent.clarifications_needed:
                 await _send(websocket, SystemResponse(
                     type="clarification",
@@ -75,6 +76,12 @@ async def chat_websocket(websocket: WebSocket):
                     agent=AgentPhase.CHIEF_OF_STAFF,
                     agent_status=AgentStatus.BLOCKED,
                     metadata={"intent_summary": intent.summary},
+                ))
+                await _send(websocket, SystemResponse(
+                    type="done",
+                    content="",
+                    agent=AgentPhase.CHIEF_OF_STAFF,
+                    agent_status=AgentStatus.COMPLETE,
                 ))
                 continue
 
@@ -99,6 +106,7 @@ async def chat_websocket(websocket: WebSocket):
                     agent=AgentPhase.CHIEF_OF_STAFF,
                     agent_status=AgentStatus.BLOCKED,
                 ))
+                await _send(websocket, SystemResponse(type="done", content=""))
                 continue
 
             # Done
