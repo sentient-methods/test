@@ -12,7 +12,7 @@ WORKDIR /app
 COPY . .
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -e "."
+RUN pip install --no-cache-dir "."
 
 # Build frontend
 RUN cd frontend && npm install && npm run build

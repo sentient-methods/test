@@ -26,6 +26,9 @@ dev = [
 [project.scripts]
 mih = "backend.main:run"
 
+[tool.setuptools.packages.find]
+include = ["backend*"]
+
 [build-system]
 requires = ["setuptools>=75.0"]
 build-backend = "setuptools.build_meta"
