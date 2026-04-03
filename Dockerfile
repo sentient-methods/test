@@ -8,21 +8,16 @@ RUN apt-get update && apt-get install -y curl && \
 
 WORKDIR /app
 
+# Copy everything first (needed for pip install -e)
+COPY . .
+
 # Install Python dependencies
-COPY pyproject.toml ./
 RUN pip install --no-cache-dir -e "."
 
 # Build frontend
-COPY frontend/ frontend/
 RUN cd frontend && npm install && npm run build
 
-# Copy backend
-COPY backend/ backend/
-COPY tests/ tests/
+ENV PORT=8000
 
-# Copy other files
-COPY README.md Makefile ./
-
-EXPOSE 8000
-
-CMD ["python", "-m", "uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Use shell form so $PORT is expanded at runtime
+CMD uvicorn backend.main:app --host 0.0.0.0 --port $PORT
