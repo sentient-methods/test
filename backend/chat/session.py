@@ -120,6 +120,13 @@ class SessionStore:
     def get(self, session_id: str) -> Session | None:
         return self._sessions.get(session_id)
 
+    def remove(self, session_id: str) -> bool:
+        """Remove a session from memory and database."""
+        removed = session_id in self._sessions
+        self._sessions.pop(session_id, None)
+        # Note: DB deletion happens async — caller should await _delete_from_db
+        return removed
+
     def get_or_create(self, session_id: str | None, project_dir: str = ".") -> Session:
         if session_id and session_id in self._sessions:
             return self._sessions[session_id]

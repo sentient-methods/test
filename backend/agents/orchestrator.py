@@ -23,6 +23,7 @@ from backend.config import settings
 from backend.intent.translator import ActionableIntent
 from backend.middleware.ceo_filter import filter_for_ceo
 from backend.tools.workspace import ensure_workspace, get_workspace_tree
+from backend.tools.cost_tracker import cost_tracker
 
 logger = logging.getLogger(__name__)
 
@@ -154,6 +155,15 @@ async def _run_sdk_agent(
                 for block in message.content:
                     if isinstance(block, TextBlock):
                         result_parts.append(block.text)
+                # Track costs from SDK agent
+                if hasattr(message, "usage") and message.usage:
+                    cost_tracker.track(
+                        session_id=session.id,
+                        agent=agent_def.name,
+                        model=agent_def.model,
+                        input_tokens=message.usage.get("input_tokens", 0),
+                        output_tokens=message.usage.get("output_tokens", 0),
+                    )
     except Exception as e:
         logger.exception("SDK agent %s failed", agent_def.name)
         return f"Agent {agent_def.title} encountered an error: {e}"
@@ -181,6 +191,15 @@ async def _run_api_agent(
         thinking={"type": "adaptive"},
         system=agent_def.system_prompt,
         messages=[{"role": "user", "content": prompt}],
+    )
+
+    # Track costs
+    cost_tracker.track(
+        session_id=session.id,
+        agent=agent_def.name,
+        model=agent_def.model,
+        input_tokens=response.usage.input_tokens,
+        output_tokens=response.usage.output_tokens,
     )
 
     return next(

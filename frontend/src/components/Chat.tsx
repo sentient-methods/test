@@ -6,7 +6,11 @@ import { AgentPipeline } from "./AgentPipeline";
 
 let messageId = 0;
 
-export function Chat() {
+interface ChatProps {
+  onOpenDashboard?: () => void;
+}
+
+export function Chat({ onOpenDashboard }: ChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [sessionId, setSessionId] = useState<string | undefined>();
@@ -146,7 +150,23 @@ export function Chat() {
               As you wish, CEO
             </p>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            {onOpenDashboard && (
+              <button
+                onClick={onOpenDashboard}
+                style={{
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  color: "rgba(255,255,255,0.5)",
+                  padding: "5px 12px",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontSize: "12px",
+                }}
+              >
+                Dashboard
+              </button>
+            )}
             <span
               style={{
                 width: "8px",

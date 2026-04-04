@@ -10,6 +10,7 @@ import anthropic
 
 from backend.config import settings
 from backend.intent.prompts import CLASSIFIER_PROMPT, TRANSLATOR_PROMPT
+from backend.tools.cost_tracker import cost_tracker
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +35,7 @@ class ActionableIntent:
     raw_ceo_input: str = ""
 
 
-async def classify_intent(ceo_input: str) -> str:
+async def classify_intent(ceo_input: str, session_id: str = "") -> str:
     """Fast classification of what the CEO wants (uses Haiku for speed)."""
     client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key)
     response = await client.messages.create(
@@ -43,6 +44,9 @@ async def classify_intent(ceo_input: str) -> str:
         system=CLASSIFIER_PROMPT,
         messages=[{"role": "user", "content": ceo_input}],
     )
+    if session_id:
+        cost_tracker.track(session_id, "classifier", settings.model_classifier,
+                           response.usage.input_tokens, response.usage.output_tokens)
     intent_type = response.content[0].text.strip().lower()
     valid_types = {"build", "fix", "change", "deploy", "explain", "plan"}
     return intent_type if intent_type in valid_types else "build"
@@ -55,7 +59,8 @@ async def translate_intent(ceo_input: str, session) -> ActionableIntent:
     understanding the org's capabilities, and producing a clear plan.
     """
     # Step 1: Classify (fast, cheap)
-    intent_type = await classify_intent(ceo_input)
+    session_id = session.id if hasattr(session, "id") else ""
+    intent_type = await classify_intent(ceo_input, session_id)
     logger.info("Classified intent: %s", intent_type)
 
     # Step 2: Translate into specs (more thorough)
@@ -79,6 +84,10 @@ async def translate_intent(ceo_input: str, session) -> ActionableIntent:
             }
         ],
     )
+
+    if session_id:
+        cost_tracker.track(session_id, "translator", settings.model_translator,
+                           response.usage.input_tokens, response.usage.output_tokens)
 
     raw_text = response.content[0].text.strip()
 

@@ -76,6 +76,16 @@ def get_workspace_files(session_id: str) -> list[str]:
     return sorted(files)
 
 
+def delete_workspace(session_id: str) -> bool:
+    """Delete a workspace and all its contents."""
+    import shutil
+    workspace = WORKSPACES_ROOT / session_id
+    if workspace.exists():
+        shutil.rmtree(workspace)
+        return True
+    return False
+
+
 def get_workspace_tree(session_id: str) -> str:
     """Get a tree view of the workspace for agent context."""
     files = get_workspace_files(session_id)
