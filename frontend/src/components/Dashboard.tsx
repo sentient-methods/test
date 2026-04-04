@@ -5,6 +5,7 @@ interface SessionInfo {
   created_at: string;
   message_count: number;
   last_intent: string;
+  github_repo?: string;
   cost: {
     total_cost_usd: number;
     total_tokens: number;
@@ -151,6 +152,18 @@ export function Dashboard({ onClose, onSelectSession }: Props) {
                         {workspace?.file_count ?? 0} files &middot;{" "}
                         ${session.cost.total_cost_usd.toFixed(4)}
                       </div>
+                      {session.github_repo && (
+                        <div style={{ fontSize: "12px", marginTop: "4px" }}>
+                          <a
+                            href={session.github_repo}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ color: "#4a9eff", textDecoration: "none" }}
+                          >
+                            View on GitHub
+                          </a>
+                        </div>
+                      )}
                       {Object.keys(session.cost.cost_by_agent).length > 0 && (
                         <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.25)", marginTop: "4px" }}>
                           {Object.entries(session.cost.cost_by_agent)

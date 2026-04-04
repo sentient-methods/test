@@ -153,6 +153,7 @@ async def dashboard():
                 "created_at": s.created_at.isoformat(),
                 "message_count": len(s.messages),
                 "last_intent": s.context.get("last_intent", ""),
+                "github_repo": s.context.get("github_repo", ""),
                 "cost": cost_tracker.get_summary(s.id),
             }
             for s in sessions

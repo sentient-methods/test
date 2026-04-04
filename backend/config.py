@@ -20,6 +20,10 @@ class Settings(BaseSettings):
     # Agent defaults
     max_agent_turns: int = 25
 
+    # GitHub integration — push generated projects to repos
+    github_token: str = ""
+    github_owner: str = ""  # GitHub user or org to create repos under
+
     # Project defaults
     default_project_dir: str = "."
 

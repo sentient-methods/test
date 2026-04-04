@@ -24,6 +24,7 @@ from backend.intent.translator import ActionableIntent
 from backend.middleware.ceo_filter import filter_for_ceo
 from backend.tools.workspace import ensure_workspace, get_workspace_tree
 from backend.tools.cost_tracker import cost_tracker
+from backend.tools.github_sync import sync_workspace
 
 logger = logging.getLogger(__name__)
 
@@ -88,6 +89,26 @@ async def execute_intent(
 
     session.context["last_intent"] = intent.summary
     session.context["last_outputs"] = {k: v[:500] for k, v in agent_outputs.items()}
+
+    # Push to GitHub if any SDK agent ran (meaning files were created/modified)
+    if any(spec.agent in SDK_AGENTS for spec in sorted_specs):
+        try:
+            repo_url = await sync_workspace(
+                session_id=session.id,
+                workspace_path=session.project_dir,
+                intent_summary=intent.summary,
+            )
+            if repo_url:
+                session.context["github_repo"] = repo_url
+                yield SystemResponse(
+                    type="message",
+                    content=f"Pushed to GitHub: {repo_url}",
+                    agent=AgentPhase.DEVOPS,
+                    agent_status=AgentStatus.COMPLETE,
+                    metadata={"github_url": repo_url},
+                )
+        except Exception as e:
+            logger.warning("GitHub push failed (non-fatal): %s", e)
 
 
 def _build_prompt(
